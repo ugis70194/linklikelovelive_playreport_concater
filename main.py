@@ -104,8 +104,11 @@ async def main(e):
     imgs.append(imgC)
   #if imgB == None:
   #  await showThumbnail(None)
-  completeImg = concatPlayReport(imgs)
-  resultElemet.src = f"data:image/jpeg;base64,{cv2ImageToBase64Text(completeImg)}"
+  try:
+    completeImg = concatPlayReport(imgs)
+    resultElemet.src = f"data:image/jpeg;base64,{cv2ImageToBase64Text(completeImg)}"
+  except:
+    alertElement.textContent = "すみません。結合できませんでした。"
   imgA = None
   imgB = None
   imgC = None
