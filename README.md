@@ -9,3 +9,7 @@ Run on [pyscript.com](https://pyscript.com/@ugis2001/concat-playreport/latest)
 ## How to Use?
 
 結合したプレイレポートを選択して、「くっつける」を押すと結合処理が開始されます。
+
+## bug report
+
+結合できなかった画像を issue に貼り付けていただけると、可能そうであればできるようにします。
