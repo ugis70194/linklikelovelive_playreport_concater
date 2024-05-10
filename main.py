@@ -60,7 +60,7 @@ def concatPlayReport(imgs: list[numpy.ndarray]):
   _, stitched_w, _ = numpy.shape(stitchedImg)
   width = min(original_w, stitched_w)
 
-  top = imgs[0][numpy.ix_([i for i in range(top+1)], [i for i in range(width)])]
+  top = imgs[0][numpy.ix_([i for i in range(top)], [i for i in range(width)])]
   skillReport = stitchedImg[:, [i for i in range(width)]]
 
   completeImg = numpy.vstack([top, skillReport])
