@@ -1,5 +1,5 @@
 import cv2, numpy
-from js import Uint8Array, window
+from js import Uint8Array
 from pyscript import document
 import base64
 
@@ -12,8 +12,6 @@ thumbnailImageB = document.querySelector('#img_b')
 thumbnailImageC = document.querySelector('#img_c')
 submitButton = document.querySelector("#submit")
 anker = document.querySelector("#anker")
-
-preprocessed = False
 
 imgA = None
 imgB = None
@@ -30,21 +28,18 @@ def cv2ImageToBase64Text(img):
   _, encoded = cv2.imencode(".jpg", img)
   return base64.b64encode(encoded).decode("ascii")
 
-def clipBrightArea(img, threshold):
-    height, width = numpy.shape(img)
-    niti = (img > threshold) * 1
+def clipBrightArea(img, threshold, topLevel = 0):
+  height, width = numpy.shape(img)
+  niti = (img > threshold) * 1
 
-    top = 0
+  top = topLevel
+  while(niti[top].sum() < width/2 and top < height):
+    top += 1
 
-    while(niti[top].sum() < width/2 and top < height):
-        top += 1
-
-    bottom = top
-
-    while(niti[bottom].sum() > 1 and bottom < height):
-        bottom += 1
-    
-    return top, bottom
+  bottom = top
+  while(niti[bottom].sum() > 1 and bottom < height):
+    bottom += 1
+  return top, bottom
 
 def clipImage(img):
   gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -52,55 +47,27 @@ def clipImage(img):
   left, right = clipBrightArea(gray.T, 128)
   return img[top:bottom, left:right]
 
-def stitchingImg3(imgA, imgB, imgC):  
-  diff = abs(imgA - imgB)
-  diff = cv2.cvtColor(diff, cv2.COLOR_BGR2GRAY)
-  
-  bottom = len(diff) - 1
-  
-  while(diff[bottom].sum() == 0 and bottom > 0):
-      bottom -= 1
-  
-  top = bottom
-  
-  while(diff[top].sum() != 0 and top > 0):
-      top -= 1
-  
-  clipedImgA = imgA[top:bottom]
-  clipedImgB = imgB[top:bottom]
-  clipedImgC = imgC[top:bottom]
+def concatPlayReport(imgs: list[numpy.ndarray]):
+  diff = abs(imgs[0] - imgs[1])
+  h, _, _ = numpy.shape(diff)
+  top, bottom = clipBrightArea(cv2.cvtColor(diff, cv2.COLOR_BGR2GRAY), 128, int(h*0.3))
+  skillReports = [img[top:bottom] for img in imgs]
 
   stitcher = cv2.Stitcher.create(cv2.Stitcher_SCANS)
-  status, stitchedImg = stitcher.stitch([clipedImgA, clipedImgB, clipedImgC])
-  completeImg = numpy.vstack([imgA[:top], stitchedImg, imgA[bottom+1:-1]])
-  
-  return completeImg
+  _, stitchedImg = stitcher.stitch(skillReports)
 
-def stitchingImg2(imgA, imgB):  
-  diff = abs(imgA - imgB)
-  diff = cv2.cvtColor(diff, cv2.COLOR_BGR2GRAY)
-  
-  bottom = len(diff) - 1
-  
-  while(diff[bottom].sum() == 0 and bottom > 0):
-      bottom -= 1
-  
-  top = bottom
-  
-  while(diff[top].sum() != 0 and top > 0):
-      top -= 1
-  
-  clipedImgA = imgA[top:bottom]
-  clipedImgB = imgB[top:bottom]
+  _, original_w, _ = numpy.shape(imgs[0])
+  _, stitched_w, _ = numpy.shape(stitchedImg)
+  width = min(original_w, stitched_w)
 
-  stitcher = cv2.Stitcher.create(cv2.Stitcher_SCANS)
-  status, stitchedImg = stitcher.stitch([clipedImgA, clipedImgB])
-  completeImg = numpy.vstack([imgA[:top], stitchedImg, imgA[bottom+1:-1]])
-  
+  top = imgs[0][numpy.ix_([i for i in range(top+1)], [i for i in range(width)])]
+  skillReport = stitchedImg[:, [i for i in range(width)]]
+
+  completeImg = numpy.vstack([top, skillReport])
   return completeImg
 
 async def showThumbnail(e):
-  global imgA, imgB, imgC, preprocessed
+  global imgA, imgB, imgC
   alertElement.textContent = ""
   fileList = fileSelector.files
 
@@ -122,34 +89,27 @@ async def showThumbnail(e):
   if len(fileList) == 3:
     imgC = clipImage(imgC)
 
-  preprocessed = True
-
   thumbnailImageA.src = f"data:image/jpeg;base64,{cv2ImageToBase64Text(imgA)}"
   thumbnailImageB.src = f"data:image/jpeg;base64,{cv2ImageToBase64Text(imgB)}"
   if len(fileList) == 3:
     thumbnailImageC.src = f"data:image/jpeg;base64,{cv2ImageToBase64Text(imgC)}"
 
 async def main(e):
-  global imgA, imgB, imgC, preprocessed
+  global imgA, imgB, imgC
 
   fileList = fileSelector.files
-
-  if not preprocessed:
-    messageElement.textContent = "Wating Preprocess ..."
-    showThumbnail()
-  
   messageElement.textContent = "Processing ..."
-  completeImg = None
-  if len(fileList) == 2:
-    completeImg = stitchingImg2(imgA, imgB)
+  imgs = [imgA, imgB]
   if len(fileList) == 3:
-    completeImg = stitchingImg3(imgA, imgB, imgC)
+    imgs.append(imgC)
+  #if imgB == None:
+  #  await showThumbnail(None)
+  completeImg = concatPlayReport(imgs)
   resultElemet.src = f"data:image/jpeg;base64,{cv2ImageToBase64Text(completeImg)}"
   imgA = None
   imgB = None
   imgC = None
   messageElement.textContent = ""
-  preprocessed = False
 
   anker.click()
 
