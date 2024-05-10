@@ -50,7 +50,7 @@ def clipImage(img):
 def concatPlayReport(imgs: list[numpy.ndarray]):
   diff = abs(imgs[0] - imgs[1])
   h, _, _ = numpy.shape(diff)
-  top, bottom = clipBrightArea(cv2.cvtColor(diff, cv2.COLOR_BGR2GRAY), 128, int(h*0.3))
+  top, bottom = clipBrightArea(cv2.cvtColor(diff, cv2.COLOR_BGR2GRAY), 128, int(h*0.25))
   skillReports = [img[top:bottom] for img in imgs]
 
   stitcher = cv2.Stitcher.create(cv2.Stitcher_SCANS)
