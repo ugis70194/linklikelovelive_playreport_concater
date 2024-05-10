@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>【104期対応版】リンクラプレイレポート結合ツール - Link！Like！ラブライブ！蓮ノ空女学院スクールアイドルクラブ スクールアイドルステージ（スクステ）プレイレポート結合ツール</title>
+    <meta name="description" content="どうしても2枚に分かれてしまうスキル使用回数の部分を結合して1枚のスクリーンショットに加工します"/>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
+    <style>
+      #submit {display: none;}
+    </style>
+    <script type="module">
+      const submitButton = document.getElementById("submit");
+      const messageElemet = document.getElementById("message");
+      addEventListener("py:ready", (e) => {
+        submitButton.style.setProperty("display", "inline");
+        messageElemet.textContent = "";
+      })
+    </script>
+  </head>
+  <body>
+    <div id="input">
+      <p>104 期対応版！</p>
+      <p>※ 2年生の部分のスクリーンショットは3年生部分を多めにすると結合の成功確率が上がります</p>
+      <p>くっつけたいスクリーンショットを2つ、または3つ選択してください(順不同)</p>
+      <input id="fileselector" type="file" multiple />
+      <p id="alert" style="color:crimson;"></p>
+    </div>
+    <div id="selected" style="display:flex;">
+      <img id="img_a" src="" style="width: 30vw;"/>
+      <img id="img_b" src="" style="width: 30vw;"/>
+      <img id="img_c" src="" style="width: 30vw;"/>
+    </div>
+    <div>
+      <button id="submit" type="submit">くっつける</button>
+      <a id="anker" href="#bottom"></a>
+    </div>
+    <p id="message">Loding...</p>
+    <div>
+      <img id="result" src="" style="width: 90vw;"/>
+      <a name="bottom"></a>
+    </div>
+    <script type="py" src="./main.py" config="./pyscript.toml"></script>
+  </body>
+</html>
