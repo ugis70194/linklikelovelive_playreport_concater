@@ -8,7 +8,7 @@
     <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
     <style>
       #submit {display: none;}
-      #fileselector {display: none;}
+      /* #fileselector {display: none;} */
     </style>
     <script type="module">
       const submitButton = document.getElementById("submit");
@@ -16,7 +16,7 @@
       const messageElemet = document.getElementById("message");
       addEventListener("py:ready", (e) => {
         submitButton.style.setProperty("display", "inline");
-        fileSelector.style.setProperty("display", "inline");
+        //fileSelector.style.setProperty("display", "inline");
         messageElemet.textContent = "";
       })
     </script>
