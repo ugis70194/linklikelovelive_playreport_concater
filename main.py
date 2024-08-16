@@ -17,6 +17,9 @@ submitButton = document.querySelector("#submit")
 optionButton = document.querySelector("#concat_option")
 anker = document.querySelector("#anker")
 
+thumb_stats = document.querySelector("#thumbnail_stats")
+thumb_bonus = document.querySelector("#thumbnail_bonus")
+
 imgA = None
 imgB = None
 imgC = None
@@ -146,6 +149,18 @@ async def clip_bonus():
     
     return img[upper:lower]
 
+async def showStats(e):
+  fileList = statsSelector.files
+  img = await readFileAsCV2Image(fileList.item(0))
+
+  thumb_stats.src = f"data:image/jpeg;base64,{cv2ImageToBase64Text(img)}"
+
+async def showBonus(e):
+  fileList = bonusSelector.files
+  img = await readFileAsCV2Image(fileList.item(0))
+
+  thumb_bonus.src = f"data:image/jpeg;base64,{cv2ImageToBase64Text(img)}"
+
 async def option(e):
   global completeImg
   stats, bonus, options = None, None, None
@@ -176,3 +191,6 @@ async def option(e):
 fileSelector.onchange = showThumbnail
 submitButton.onclick = main
 optionButton.onclick = option
+
+statsSelector.onchange = showStats
+bonusSelector.onchange = showBonus
