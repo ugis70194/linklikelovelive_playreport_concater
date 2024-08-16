@@ -6,16 +6,21 @@ import base64
 alertElement = document.querySelector("#alert")
 messageElement = document.querySelector("#message")
 resultElemet = document.querySelector("#result")
+withOption = document.querySelector("#with_option")
 fileSelector = document.querySelector("#fileselector")
+statsSelector = document.querySelector("#stats_selector")
+bonusSelector = document.querySelector("#bonus_selector")
 thumbnailImageA = document.querySelector('#img_a')
 thumbnailImageB = document.querySelector('#img_b')
 thumbnailImageC = document.querySelector('#img_c')
 submitButton = document.querySelector("#submit")
+optionButton = document.querySelector("#concat_option")
 anker = document.querySelector("#anker")
 
 imgA = None
 imgB = None
 imgC = None
+completeImg = None
 
 async def readImageAsNdarray(image):
   arrayBuffer = Uint8Array.new(await image.arrayBuffer())
@@ -95,8 +100,9 @@ async def showThumbnail(e):
     thumbnailImageC.src = f"data:image/jpeg;base64,{cv2ImageToBase64Text(imgC)}"
 
 async def main(e):
-  global imgA, imgB, imgC
+  global imgA, imgB, imgC, completeImg
 
+  completeImg = None
   fileList = fileSelector.files
   messageElement.textContent = "Processing ..."
   imgs = [imgA, imgB]
@@ -116,5 +122,57 @@ async def main(e):
 
   anker.click()
 
+async def clip_analyzer():
+    fileList = statsSelector.files
+    assert(len(fileList) == 1)
+    img = await readFileAsCV2Image(fileList.item(0))
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+    height, _ = numpy.shape(gray)
+    upper = int(height * 0.18)
+    lower = int(height * 0.64)
+    
+    return img[upper:lower]
+
+async def clip_bonus():
+    fileList = bonusSelector.files
+    assert(len(fileList) == 1)
+    img = await readFileAsCV2Image(fileList.item(0))
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+    height, _ = numpy.shape(gray)
+    upper = int(height * 0.57)
+    lower = int(height * 0.77)
+    
+    return img[upper:lower]
+
+async def option(e):
+  global completeImg
+  stats, bonus, options = None, None, None
+  if len(statsSelector.files) > 0:
+    stats = await clip_analyzer()
+  if len(bonusSelector.files) > 0:
+    bonus = await clip_bonus()
+
+  if stats is not None and bonus is not None:
+    options = numpy.vstack([stats, bonus])
+  elif stats is not None:
+    options = stats
+  elif bonus is not None:
+    options = bonus
+
+  op_h, op_w, _ = numpy.shape(options)
+  sti_h, sti_w, _ = numpy.shape(completeImg)
+  
+  height = sti_h - op_h
+  padding = numpy.ones((height, op_w, 3)) * 255
+  print(numpy.shape(options))
+  print(numpy.shape(padding))
+  options = numpy.vstack([options, padding])
+
+  with_option = numpy.hstack([completeImg, options])
+  withOption.src = f"data:image/jpeg;base64,{cv2ImageToBase64Text(with_option)}"
+
 fileSelector.onchange = showThumbnail
 submitButton.onclick = main
+optionButton.onclick = option

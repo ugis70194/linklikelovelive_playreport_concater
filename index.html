@@ -5,10 +5,10 @@
     <meta name="description" content="どうしても2枚に分かれてしまうスキル使用回数の部分を結合して1枚のスクリーンショットに加工します"/>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
+    <script type="module" src="https://pyscript.net/releases/2024.8.2/core.js"></script>
     <style>
       #submit {display: none;}
-      #fileselector {display: none;}
+      input {display: none;}
       .btn-square {
         display: inline-block;
         padding: 0.5em 1em;
@@ -64,6 +64,25 @@
     <div>
       <img id="result" src="" style="width: 90vw;"/>
       <a name="bottom"></a>
+    </div>
+    <p><b>オプション</b></p>
+    <div>
+      <label class="btn-square">
+        ステータス画面をくっつける
+        <input id="stats_selector" type="file" />
+      </label>
+    </div>
+    <p></p>
+    <div>
+      <label class="btn-square">
+        ボーナス画面をくっつける
+        <input id="bonus_selector" type="file" />
+      </label>
+    </div>
+    <p></p>
+    <div>
+      <button class="btn-square" id="concat_option" type="submit">くっつける</button>
+      <img id="with_option" src="" style="width: 90vw;"/>
     </div>
     <script type="py" src="./main.py" config="./pyscript.toml"></script>
   </body>
